@@ -1,0 +1,29 @@
+LD $220 "Rafael"
+
+MV I, $220 ; move o R de 'Rafael' para o registrador A
+
+; MV A "string" ; Isso dá erro
+
+;;@label         ; define um label
+
+LD $0 #64     ; carregar numero 64 no addr 0
+MV $1 $0      ; move valor do endereço 0 para o enderoço 1
+MV A B        ; Move B register value into A register value
+
+OUT %, '>'     ; escreve o caracter >
+OUT %, "Hello" ; % significa ultimo char do output, e o comando repete para cada char da string
+
+goto :label    ; pula pro endereço do "label"
+
+
+[x]  @                    -> inicia um label
+[x]  LD/MV/OUT/PRT/godo   -> keywords
+[x]  $/#                  -> numeros addr/decimal
+[x]  'a'/"abc..."         -> char/char sequence
+[x]  A/B/C/X/I/%          -> registradores
+[x] ;/ ; ;                -> comantarios 
+
+
+LD $0 #273
+;;
+
