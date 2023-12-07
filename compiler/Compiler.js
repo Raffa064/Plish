@@ -1,8 +1,7 @@
 const fs = require("fs");
-const Tokenizer = require("./Tokenizer.js");
-const OP = require("./Opcodes.js");
-const { registerID, count } = require("./Utils.js");
-const tokenHandlers = require("./Handlers.js");
+const Tokenizer = require("./Tokenizer");
+const { count } = require("./Utils");
+const tokenHandlers = require("./Handlers");
 
 function Compiler() {
   const tokenizer = new Tokenizer();
