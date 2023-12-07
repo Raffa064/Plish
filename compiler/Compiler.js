@@ -1,159 +1,11 @@
 const fs = require("fs");
 const Tokenizer = require("./Tokenizer.js");
-
-const OP = {
-  // Opcodes
-  NOP: 0x00, // Don't do nothing
-  LD_addr_num: 0x01, // Load a number (dec/dex) into memory
-  LD_addr_reg: 0x02, // Load register into memory
-  LD_addr_char: 0x03, // Load an char or char sequence into memory
-  MV_reg_dec: 0x04, // Move an number (dec) to a register
-  MV_reg_addr: 0x05, // Move a memory value to a register
-  MV_reg_reg: 0x06, // Move an value from a register to other
-  MV_reg_char: 0x07, // Move an UNIQUE char to a register
-  goto: 0x08, // Goto to an address (specified by labels)
-};
+const OP = require("./Opcodes.js");
+const { registerID, count } = require("./Utils.js");
+const tokenHandlers = require("./Handlers.js");
 
 function Compiler() {
   const tokenizer = new Tokenizer();
-
-  function registerID(register) {
-    var id = 0;
-
-    switch (register) {
-      case "A":
-        id = 0;
-        break;
-      case "B":
-        id = 1;
-        break;
-      case "C":
-        id = 2;
-        break;
-      case "I":
-        id = 3;
-        break;
-    }
-
-    return id;
-  }
-
-  function Label(ctx, tokenIndex, token) {
-    const { type } = token;
-
-    if (type == "Label") {
-      const { label } = token.data;
-
-      const binAddr = ctx.pushBin(OP.NOP); // add a empty opcode
-      ctx.setSymbol(label, binAddr); // set symbol value as its address
-
-      return true;
-    }
-
-    return false;
-  }
-
-  function Keywords(ctx, tokenIndex, token) {
-    const { type } = token;
-
-    if (type == "Keyword") {
-      const keywords = {
-        LD: () => {
-          const [arg0, arg1] = ctx.getArgs(tokenIndex, 2);
-
-          const addr = parseInt(arg0.data.number, 16);
-          const sourceType = arg1.type;
-
-          switch (sourceType) {
-            case "Number":
-              const { number, numberType } = arg1.data;
-              const decimal = parseInt(
-                number,
-                numberType == "decimal" ? 10 : 16,
-              );
-              ctx.pushBin(OP.LD_addr_num, addr, decimal);
-              break;
-            case "Register":
-              const register = arg1.data.register;
-              ctx.pushBin(OP.LD_addr_reg, addr, registerID(register));
-
-              break;
-            case "Char":
-              const { value, isSequence } = arg1.data;
-
-              // TODO: apply scape to string
-
-              if (isSequence) {
-                for (let i = 0; i < value.length; i++) {
-                  const char = value.charCodeAt(i);
-                  ctx.pushBin(OP.LD_addr_char, addr + i, char);
-                }
-              } else {
-                ctx.pushBin(OP.LD_addr_char, addr, value.charCodeAt(0));
-              }
-
-              break;
-          }
-        },
-        MV: () => {
-          const [arg0, arg1] = ctx.getArgs(tokenIndex, 2);
-
-          const targetRegister = registerID(arg0.data.register);
-          const sourceType = arg1.type;
-
-          switch (sourceType) {
-            case "Number":
-              const { number, numberType } = arg1.data;
-              const decimal = parseInt(
-                number,
-                numberType == "decimal" ? 10 : 16,
-              );
-
-              if (numberType == "decimal") {
-                ctx.pushBin(OP.MV_reg_dec, targetRegister, decimal);
-              } else {
-                ctx.pushBin(OP.MV_reg_addr, targetRegister, decimal); // Copy value from memory
-              }
-
-              break;
-            case "Register":
-              const sourceRegister = registerID(arg1.data.register);
-              ctx.pushBin(OP.MV_reg_reg, targetRegister, sourceRegister);
-              break;
-            case "Char":
-              const { value, isSequence } = arg1.data;
-
-              if (isSequence) {
-                throw new Error("Can't move string to a register");
-              } else {
-                ctx.pushBin(
-                  OP.MV_reg_char,
-                  targetRegister,
-                  value.charCodeAt(0),
-                );
-              }
-
-              break;
-          }
-        },
-        goto: () => {
-          const symbolAddr = ctx.pushBin(OP.goto, 0x0000) + 1;
-
-          const symbol = ctx.getArgs(tokenIndex, 1)[0].data.symbol;
-          ctx.getSymbol(symbol, symbolAddr);
-        },
-      };
-
-      const { keyword } = token.data;
-
-      if (keywords[keyword]) {
-        keywords[keyword]();
-        return true;
-      }
-    }
-
-    return false;
-  }
 
   function compile(sources, output) {
     sources = [sources]; // gambiarra, dps tem remover isso
@@ -212,23 +64,51 @@ function Compiler() {
       },
     };
 
-    const tokenHandlers = [Label, Keywords];
+    for (let tokenIndex = 0; tokenIndex < tokens.length; ) {
+      const token = tokens[tokenIndex];
+      var validToken = false;
 
-    var tokenIndex = 0;
-    for (const token of tokens) {
       for (const handler of tokenHandlers) {
         if (handler(ctx, tokenIndex, token)) {
+          validToken = true;
           break;
         }
       }
 
-      tokenIndex++;
+      if (!validToken) {
+        const start = token.start;
+        const end = token.end;
+        const code = token.source.substring(start, end);
+        const line = count(token.source.substring(0, start), "\n") + 1;
+
+        throw new Error(
+          '\033[0;31mInvalid token "' +
+            code +
+            '", at line ' +
+            line +
+            "\033[0;37m",
+        );
+      }
+
+      tokenIndex = (ctx.tokenIndex || tokenIndex) + 1;
+      delete ctx.tokenIndex;
     }
 
     const binStr = ctx.bin.reduce((prev, curr) => {
       return prev + String.fromCharCode(curr);
     }, "");
     fs.writeFileSync(output, binStr, () => {});
+
+    return {
+      sources,
+      tokens,
+      symbols: {
+        solved: ctx.solved,
+        unsolved: ctx.unsolved,
+      },
+      bin: ctx.bin,
+      binStr,
+    };
   }
 
   return {

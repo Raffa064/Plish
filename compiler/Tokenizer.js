@@ -298,6 +298,8 @@ function Tokenizer() {
           const { end } = token;
           i = end;
 
+          token.source = source;
+
           break;
         }
       }
