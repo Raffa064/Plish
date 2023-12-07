@@ -1,3 +1,5 @@
+const { REGISTERS } = require("./Utils");
+
 function Tokenizer() {
   function removeComments(source) {
     var outputSource = "";
@@ -167,16 +169,8 @@ function Tokenizer() {
   function Register(source, t) {
     var end = -1;
 
-    var registers = [
-      // Math registers (8bit)
-      "A",
-      "B",
-      "C",
-      "I", // memory register (16bit)
-    ];
-
-    for (let i = 0; i < registers.length; i++) {
-      const reg = registers[i];
+    for (let i = 0; i < REGISTERS.length; i++) {
+      const reg = REGISTERS[i];
 
       if (source.substring(t, t + 1) == reg) {
         end = t + 1;

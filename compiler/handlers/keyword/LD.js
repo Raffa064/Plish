@@ -1,22 +1,40 @@
 const OP = require("../../Opcodes");
-const { registerID } = require("../../Utils");
+const { B16_REGISTERS, registerID } = require("../../Utils");
 
 function LD(ctx, tokenIndex, token) {
   const [arg0, arg1] = ctx.getArgs(tokenIndex, 2);
   ctx.tokenIndex = tokenIndex + 2;
 
-  const addr = parseInt(arg0.data.number, 16);
+  var opcode = null;
+  var p0 = null;
+  if (arg0.type == "Register") {
+    const { register } = arg0.data;
+
+    if (B16_REGISTERS.indexOf(register) < 0) {
+      throw new Error("Invalid LD_I register: " + register);
+    }
+
+    opcode = OP.LD.I;
+    p0 = registerID(register);
+  } else {
+    opcode = OP.LD.addr;
+    p0 = parseInt(
+      arg0.data.number,
+      arg0.data.numberType == "decimal" ? 10 : 16,
+    );
+  }
+
   const sourceType = arg1.type;
 
   switch (sourceType) {
     case "Number":
       const { number, numberType } = arg1.data;
       const decimal = parseInt(number, numberType == "decimal" ? 10 : 16);
-      ctx.pushBin(OP.LD_addr_num, addr, decimal);
+      ctx.pushBin(opcode.num, p0, decimal);
       break;
     case "Register":
       const register = arg1.data.register;
-      ctx.pushBin(OP.LD_addr_reg, addr, registerID(register));
+      ctx.pushBin(opcode.reg, p0, registerID(register));
 
       break;
     case "Char":
@@ -27,10 +45,10 @@ function LD(ctx, tokenIndex, token) {
       if (isSequence) {
         for (let i = 0; i < value.length; i++) {
           const char = value.charCodeAt(i);
-          ctx.pushBin(OP.LD_addr_char, addr + i, char);
+          ctx.pushBin(opcode.char, p0 + i, char);
         }
       } else {
-        ctx.pushBin(OP.LD_addr_char, addr, value.charCodeAt(0));
+        ctx.pushBin(opcode, p0, value.charCodeAt(0));
       }
 
       break;

@@ -1,4 +1,4 @@
-const OP = require("../../Utils");
+const OP = require("../../Opcodes");
 
 function goto(ctx, tokenIndex, token) {
   const symbolAddr = ctx.pushBin(OP.goto, 0x0000) + 1;

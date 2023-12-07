@@ -1,22 +1,9 @@
+const B8_REGISTERS = ["A", "B", "C"];
+const B16_REGISTERS = ["I", "O"];
+const REGISTERS = [...B8_REGISTERS, ...B16_REGISTERS];
+
 function registerID(register) {
-  var id = 0;
-
-  switch (register) {
-    case "A":
-      id = 0;
-      break;
-    case "B":
-      id = 1;
-      break;
-    case "C":
-      id = 2;
-      break;
-    case "I":
-      id = 3;
-      break;
-  }
-
-  return id;
+  return REGISTERS.indexOf(register);
 }
 
 function count(str, substr) {
@@ -77,6 +64,9 @@ function c(style, color) {
 }
 
 module.exports = {
+  B8_REGISTERS,
+  B16_REGISTERS,
+  REGISTERS,
   registerID,
   count,
   c,

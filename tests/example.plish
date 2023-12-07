@@ -1,15 +1,20 @@
-@label         ; define um label
+@label            ; define um label
 
-LD $0 #64     ; Carrega o numero 64 no addr 0
-MV $1 $0      ; Move valor do endereço 0 para o addr 1
-MV A B        ; Move o valor do registrador B para o registrador A
+LD $0 #64         ; Carrega o numero 64 no addr 0
+MV $1 $0          ; Move valor do endereço 0 para o addr 1
+MV A B            ; Move o valor do registrador B para o registrador A
 
-LD $200 "Rafael" ; Carrega a string "Rafael" apartir do endereço 512
+LD $200 "Rafael"  ; Carrega a string "Rafael" apartir do endereço 512
 
-OUT %, '>'     ; Escreve o caracter > no buffer de saida
-OUT %, "Hello" ; Escreve "Hello no buffer de saida" (% significa ultimo char do output, e esse comando repete para cada char da string)
+LD I O            ; Salva o valor de O no enderço I
 
-goto label    ; pula pro endereço do "label" (q é 0 no caso)
+;OUT O '>'         ; Escreve o caracter > no buffer de saida
+;OUT O "Helli"     ; Escreve "Helli" no buffer de saida ('O' é um registrador q aponta para o fim do buffer de saida, e esse comando repete para cada char da string)
+
+;SUB O 1           ; Subtrai 1 do registrador de saida
+;OUT O 'o'         ; Corrige o "Helli" para "Hello"
+
+goto label        ; pula pro endereço do "label" (q é 0 no caso)
 
 ;;
 

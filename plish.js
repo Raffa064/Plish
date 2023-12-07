@@ -15,7 +15,7 @@ switch (test) {
     );
     break;
   case "compile":
-    console.log(compiler.compile(source, "tests/output.bin").bin);
+    console.log(compiler.compile(source, "tests/output.bin"));
     break;
 }
 
