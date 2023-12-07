@@ -1,20 +1,17 @@
-LD $220 "Rafael"
+@label         ; define um label
 
-MV I, $220 ; move o R de 'Rafael' para o registrador A
+LD $0 #64     ; Carrega o numero 64 no addr 0
+MV $1 $0      ; Move valor do endereço 0 para o addr 1
+MV A B        ; Move o valor do registrador B para o registrador A
 
-; MV A "string" ; Isso dá erro
+LD $200 "Rafael" ; Carrega a string "Rafael" apartir do endereço 512
 
-;;@label         ; define um label
+OUT %, '>'     ; Escreve o caracter > no buffer de saida
+OUT %, "Hello" ; Escreve "Hello no buffer de saida" (% significa ultimo char do output, e esse comando repete para cada char da string)
 
-LD $0 #64     ; carregar numero 64 no addr 0
-MV $1 $0      ; move valor do endereço 0 para o enderoço 1
-MV A B        ; Move B register value into A register value
+goto label    ; pula pro endereço do "label" (q é 0 no caso)
 
-OUT %, '>'     ; escreve o caracter >
-OUT %, "Hello" ; % significa ultimo char do output, e o comando repete para cada char da string
-
-goto :label    ; pula pro endereço do "label"
-
+;;
 
 [x]  @                    -> inicia um label
 [x]  LD/MV/OUT/PRT/godo   -> keywords
@@ -23,7 +20,5 @@ goto :label    ; pula pro endereço do "label"
 [x]  A/B/C/X/I/%          -> registradores
 [x] ;/ ; ;                -> comantarios 
 
-
-LD $0 #273
 ;;
 
