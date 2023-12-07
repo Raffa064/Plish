@@ -6,7 +6,7 @@ const compiler = new Compiler();
 const source = fs.readFileSync("./tests/example.plish", "utf-8");
 
 const test = process.argv[2] || "compile";
-console.log("Selected test: " + test);
+console.log("Selected test: " + c(0, "c")(test));
 
 switch (test) {
   case "tokenize":
@@ -15,7 +15,37 @@ switch (test) {
     );
     break;
   case "compile":
-    console.log(compiler.compile(source, "tests/output.bin"));
+    const { sources, tokens, symbols } = compiler.compile(
+      source,
+      "tests/output.bin",
+    );
+
+    const title = c(1, "y");
+    const sucess = c(0, "g");
+    const error = c(0, "r");
+    const value = c(1, "c");
+
+    console.log(title("[ Sources ]"));
+    console.log("Source count: " + value(sources.length) + "\n");
+
+    console.log(title("[ Tokens ]"));
+    console.log("Token count: " + value(tokens.length));
+    console.log("\n" + colorizeTokens(tokens) + "\n");
+
+    console.log(title("[ Symbols ]"));
+    const { solved, unsolved } = symbols;
+
+    solved.forEach(({ symbol, value }) => {
+      console.log("[x]\t" + sucess(symbol + " " + value));
+    });
+
+    unsolved.forEach(({ symbol, addr }) => {
+      console.log("[ ]\t" + error(symbol + " " + addr));
+    });
+
+    console.log("Solved: " + value(solved.length));
+    console.log("Unsolved: " + value(unsolved.length));
+
     break;
 }
 

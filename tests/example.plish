@@ -14,6 +14,8 @@ LD I O            ; Salva o valor de O no enderço I
 ;SUB O 1           ; Subtrai 1 do registrador de saida
 ;OUT O 'o'         ; Corrige o "Helli" para "Hello"
 
+goto UnexistentLabel
+
 goto label        ; pula pro endereço do "label" (q é 0 no caso)
 
 ;;
