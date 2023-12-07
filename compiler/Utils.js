@@ -36,7 +36,48 @@ function count(str, substr) {
   return count;
 }
 
+function c(style, color) {
+  if (color === undefined) {
+    color = style;
+    style = "0";
+  }
+
+  if (isNaN(color)) {
+    switch (color) {
+      case "d":
+        color = "30";
+        break;
+      case "r":
+        color = "31";
+        break;
+      case "g":
+        color = "32";
+        break;
+      case "y":
+        color = "33";
+        break;
+      case "b":
+        color = "34";
+        break;
+      case "p":
+        color = "35";
+        break;
+      case "c":
+        color = "36";
+        break;
+      case "w":
+        color = "37";
+        break;
+    }
+  }
+
+  return (str) => {
+    return "\x1b[" + style + ";" + color + "m" + str + "\x1b[0;37m";
+  };
+}
+
 module.exports = {
   registerID,
   count,
+  c,
 };
